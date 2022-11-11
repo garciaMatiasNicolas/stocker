@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head') %>
+<body class="bg-dark">
+    <%- include('../partials/navbar') %>
+    <% if(products.length === 0) { %>
+        <div class="d-flex flex-column justify-content-between align-items-center mt-5">
+            <h2 class="fs-1 text-danger">Ops! An error has occurred</h2>
+            <p class="text-white">There's no products on your list. Please, complete the form in the main page</p>
+            <a href="/">Go to home</a>
+        </div>
+    <% } else { %>
+        <div class="m-5">
+            <h3 class="text-white">This is your stock!</h3>
+            <table class="table table-dark table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Stock</th>
+                </tr>
+                </thead>
+                <% products.forEach( function(product){ %>
+                    <tbody>
+                        <tr>
+                            <td><%=product.name%></td>
+                            <td><%=product.price%></td>
+                            <td><%=product.stock%></td>
+                        </tr>
+                    </tbody>
+                <% }) %>
+            </table>
+        </div>
+    <% } %>
+</body>
+</html>
