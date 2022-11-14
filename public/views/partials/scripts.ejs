@@ -1,0 +1,87 @@
+<script>
+const socket = io();
+
+let nameProduct = document.getElementById('name');
+let price = document.getElementById('price');
+let stock = document.getElementById('stock');
+let div = document.getElementById('div')
+let btn = document.getElementById('btn');
+let btnChat = document.getElementById('btn-chat') 
+let text = document.getElementById('message');
+
+const renderTable = (array) => {
+    div.innerHTML=
+    `
+    <h3 class="text-white">This is your stock!</h3>
+        <table class="table table-dark table-striped w-75">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Stock</th>
+                </tr>
+            </thead>
+            <tbody id="table"></tbody>
+        </table>
+    `
+    let template = ``  
+    array.forEach(element => {
+        let dataTable = document.getElementById('table');
+        template+= 
+        ` 
+            <tr>
+                <td>${element.name}</td>
+                <td>${element.price}</td>
+                <td>${element.stock}</td>
+            </tr>
+        `
+        dataTable.innerHTML= template  
+    });
+};
+
+const renderMessages = (message) =>{
+    let html = ``
+    message.forEach(e=>{
+        let chat = document.getElementById('chat')
+        html+=
+        `
+        <div class="w-100">
+            <p>${new Date().toLocaleDateString()}
+                <div class="d-flex w-100 align-items-center">
+                    <strong><p class="text-info">${e.author}:</p></strong>
+                    <p class="text-success"> ${e.message}</p>
+                </div>
+        </div>
+        `
+        chat.innerHTML= html
+    })
+}
+
+btn.addEventListener('click', ()=>{
+    const productData =  { name: nameProduct.value, price: price.value, stock: stock.value};
+    socket.emit('client-data', productData);
+    document.getElementById('form').reset()
+})
+
+btnChat.addEventListener('click', (e)=>{
+    let author = document.getElementById('author')
+    const newMessage = {message: text.value, author: author.value};
+    socket.emit('client-message', newMessage);
+    document.getElementById('formChat').reset();
+})
+
+socket.on('render-products', data => {
+    console.log(data);
+    renderTable(data)
+});
+
+socket.on('new mensaje', data => {
+    console.log(data)
+    renderMessages(data)
+})
+
+
+</script>
+
+
+

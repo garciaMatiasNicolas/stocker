@@ -15,17 +15,34 @@ app.use(express.json())
 app.set('views', './public/views');
 app.set('view engine', 'ejs');
 
-const products = []
+//ARRAYS
+
+const products = [];
+const messages = []; 
+
+// RENDERING INDEX
+
 app.get('/', (req, res)=>{
     res.render('pages/index', {products})
 });
 
+// SOCKETS
 
-io.on('connection', ()=>{
-    console.log('New client connected')
+io.on('connection', socket=>{
+    console.log('New client connected');
+    socket.on("client-data", data => {
+        products.push(data)
+        io.sockets.emit('render-products', products)
+    });
+    socket.on('client-message', data => {
+        messages.push(data);
+        console.log(messages)
+        io.sockets.emit('new mensaje', messages)
+    })
 })
 
 //LISTEN SERVER
+
 const PORT = 8080;
 
 http.listen(PORT, ()=>{
