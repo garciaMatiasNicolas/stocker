@@ -18,7 +18,47 @@ app.set('view engine', 'ejs');
 //ARRAYS
 
 const products = [];
-const messages = []; 
+const messages = [];
+
+//KNEX
+
+const knex = require('knex')({
+    client: 'mysql',
+    connection: {
+      host : '127.0.0.1',
+      port : 3306,
+      user : 'root',
+      password : '',
+      database : 'messages'
+    }
+})
+
+class Container {
+    constructor(config){
+        this.config = config
+    }
+
+    create(){
+        return this.config.schema.createTable("mensajes", table =>{
+            table.increments("id").primary();
+            table.string("athor")
+            table.string("message")
+        })
+        .then(()=>{console.log("table created")})
+        .catch((e)=>{console.error(e)})
+        .finally(()=>{this.config.destroy()})
+    }
+
+    insertData(data){
+        this.config("mensajes").insert(data)
+        .then(()=>{console.log("data inserted")})
+        .catch((e)=>{console.error(e)})
+        .finally(()=>{this.config.destroy()})
+    }
+}
+
+const config = new Container(knex);
+config.create()
 
 // RENDERING INDEX
 
@@ -36,7 +76,8 @@ io.on('connection', socket=>{
     });
     socket.on('client-message', data => {
         messages.push(data);
-        console.log(messages)
+        console.log(messages);
+        config.insertData(messages)
         io.sockets.emit('new mensaje', messages)
     })
 })
