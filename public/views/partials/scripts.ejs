@@ -48,8 +48,8 @@ const renderMessages = (message) =>{
         <div class="w-100">
             <p>${new Date().toLocaleDateString()}
                 <div class="d-flex w-100 align-items-center">
-                    <strong><p class="text-info">${e.author}:</p></strong>
-                    <p class="text-success"> ${e.message}</p>
+                    <strong><p class="text-info">${e.author.email}:</p></strong>
+                    <p class="text-success"> ${e.text}</p>
                 </div>
         </div>
         `
@@ -64,8 +64,17 @@ btn.addEventListener('click', ()=>{
 })
 
 btnChat.addEventListener('click', (e)=>{
-    let author = document.getElementById('author')
-    const newMessage = {message: text.value, author: author.value};
+    let email = document.getElementById('email');
+    let fullName = document.getElementById('fullName');
+    let age = document.getElementById('age');
+    const newMessage = {
+        author: {
+            email: email.value,
+            fullName: fullName.value,
+            age: age.value
+        }, 
+        text: text.value
+    };
     socket.emit('client-message', newMessage);
     document.getElementById('formChat').reset();
 })

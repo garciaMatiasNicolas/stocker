@@ -1,84 +1,45 @@
 // SETTING SERVER 
+import express from 'express';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import mongoose from 'mongoose';
+import MessagesSchema from './src/MessageSchema.js';
+import productRoute from './src/Routes.js';
 
-const express = require('express');
-const {Server: HttpServer} = require('http');
-const {Server : IOServer} = require('socket.io');
 const app = express();
-const http = new HttpServer(app);
-const io = new IOServer (http);
+const http = new createServer(app);
+const io = new Server (http);
 
+app.use('/products-test', productRoute)
 app.use(express.urlencoded({extended: true}));
-app.use(express.json())
+app.use(express.json());
 
 // SETTING EJS 
 
 app.set('views', './public/views');
 app.set('view engine', 'ejs');
 
-//ARRAYS
-
-const products = [];
-const messages = [];
-
-//KNEX
-
-const knex = require('knex')({
-    client: 'mysql',
-    connection: {
-      host : '127.0.0.1',
-      port : 3306,
-      user : 'root',
-      password : '',
-      database : 'messages'
-    }
-})
-
-class Container {
-    constructor(config){
-        this.config = config
-    }
-
-    create(){
-        return this.config.schema.createTable("mensajes", table =>{
-            table.increments("id").primary();
-            table.string("athor")
-            table.string("message")
-        })
-        .then(()=>{console.log("table created")})
-        .catch((e)=>{console.error(e)})
-        .finally(()=>{this.config.destroy()})
-    }
-
-    insertData(data){
-        this.config("mensajes").insert(data)
-        .then(()=>{console.log("data inserted")})
-        .catch((e)=>{console.error(e)})
-        .finally(()=>{this.config.destroy()})
-    }
-}
-
-const config = new Container(knex);
-config.create()
-
 // RENDERING INDEX
 
-app.get('/', (req, res)=>{
-    res.render('pages/index', {products})
+app.get('/', (_, res)=>{
+    res.render('pages/index')
 });
 
 // SOCKETS
 
+const products = [];
+const messages = [];
+
 io.on('connection', socket=>{
     console.log('New client connected');
     socket.on("client-data", data => {
-        products.push(data)
-        io.sockets.emit('render-products', products)
+        products.push(data);
+        io.sockets.emit('render-products', products);
     });
     socket.on('client-message', data => {
+        MessagesSchema.create(data);
         messages.push(data);
-        console.log(messages);
-        config.insertData(messages)
-        io.sockets.emit('new mensaje', messages)
+        io.sockets.emit('new mensaje', messages);
     })
 })
 
@@ -86,6 +47,15 @@ io.on('connection', socket=>{
 
 const PORT = 8080;
 
-http.listen(PORT, ()=>{
-    console.log('Server running');
+mongoose.connect('mongodb+srv://matigarcia:1708@test.0vglzka.mongodb.net/?retryWrites=true&w=majority')
+.then(()=>{
+    console.log('Database connected');
+    http.listen(PORT, ()=>{
+        console.log(`Server is running on port ${PORT}`)
+    })
 })
+.catch((err)=>{
+    console.error(err)
+})
+
+
