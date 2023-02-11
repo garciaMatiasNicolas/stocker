@@ -2,7 +2,6 @@
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import mongoose from 'mongoose';
 import MessagesSchema from './src/MessageSchema.js';
 import productRoute from './src/Routes.js';
 
@@ -47,15 +46,8 @@ io.on('connection', socket=>{
 
 const PORT = 8080;
 
-mongoose.connect('mongodb+srv://matigarcia:1708@test.0vglzka.mongodb.net/?retryWrites=true&w=majority')
-.then(()=>{
-    console.log('Database connected');
-    http.listen(PORT, ()=>{
-        console.log(`Server is running on port ${PORT}`)
-    })
-})
-.catch((err)=>{
-    console.error(err)
-})
 
+http.listen(PORT, ()=>{
+    console.log(`Server is running on port ${PORT}`)
+})
 
